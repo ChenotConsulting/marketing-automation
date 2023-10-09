@@ -6,11 +6,12 @@ from datetime import datetime, timedelta
 import openai
 import smtplib
 
-# Load API keys 
+# Load environment variables
 load_dotenv()
 FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
 FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
 FEEDLY_API_URL = os.getenv('FEEDLY_API_URL')
+FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -20,12 +21,10 @@ feedly = requests.Session()
 feedly.headers = {'authorization': 'OAuth ' + FEEDLY_ACCESS_TOKEN}
 openai.api_key = OPENAI_API_KEY
 
-# List of folders to query
-# Sustainability=9bb0acab-0d68-431e-89ca-d4136dcaad5b, AI=01f6d4e0-e296-44c6-b711-84133d3f46d6, Consultancy=7fbce7bc-11dc-4bcb-986a-0116094a4c0b
-folder_ids = ['7fbce7bc-11dc-4bcb-986a-0116094a4c0b']
-
 def generateInsights(articles, folder_name, urls, titles, summaries, contents):
-  # Generate insights from the articles
+  """
+  Generate insights from the articles
+  """
   prompt = f'Extract the key insights & trends from these {len(articles)} articles and highlight any resources worth checking:\n'
   for url, title, summary, content in zip(urls, titles, summaries, contents):
     prompt += f'URL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n'
@@ -49,7 +48,9 @@ def generateInsights(articles, folder_name, urls, titles, summaries, contents):
   print('========================================================================================')
 
 def generateLinkedInPost(articles, folder_name, urls, titles, summaries, contents):
-  # Generate a LinkedIn post from the articles
+  """
+  Generate a LinkedIn post from the articles
+  """
   prompt = f'Extract insights and generate a LinkedIn post including the links to the relevant articles from these {len(articles)} articles:\n'
   for url, title, summary, content in zip(urls, titles, summaries, contents):
     prompt += f'URL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n'
@@ -87,7 +88,7 @@ def sendEmail(body, urls):
 yesterday = datetime.now() - timedelta(days=1)
 timestamp_ms = int(yesterday.timestamp() * 1000)
 
-for folder_id in folder_ids:
+for folder_id in FEEDLY_FOLDERS:
 
   folder_name = 'Sustainability' if folder_id == '9bb0acab-0d68-431e-89ca-d4136dcaad5b' else 'Consultancy' if folder_id == '7fbce7bc-11dc-4bcb-986a-0116094a4c0b' else 'AI'
   # Get articles ids for this folder
