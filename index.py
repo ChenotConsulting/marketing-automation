@@ -73,7 +73,9 @@ def generateLinkedInPost(articles, folder_name, urls, titles, summaries, content
   print('========================================================================================')
 
 def sendEmail(body, urls):
-  # Set up SMTP server
+  """
+  Set up SMTP server
+  """
   smtp_server = smtplib.SMTP('smtp.gmail.com', 587)
   smtp_server.ehlo()
   smtp_server.starttls()
