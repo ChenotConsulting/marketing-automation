@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 import openai
 import smtplib
+import tiktoken
 
 # Load environment variables
 load_dotenv()
@@ -16,30 +17,56 @@ FEEDLY_FOLDERS_LIST = FEEDLY_FOLDERS.split(',')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+MODEL = 'gpt-3.5-turbo-0613'
 
 # Setup clients
 feedly = requests.Session()
 feedly.headers = {'authorization': 'OAuth ' + FEEDLY_ACCESS_TOKEN}
 openai.api_key = OPENAI_API_KEY
 
+def count_tokens(text):
+    enc = tiktoken.get_encoding("cl100k_base")
+    token_count = enc.encode(text)
+    
+    return len(token_count)
+
 def generateInsights(articles, folder_name, urls, titles, summaries, contents):
   """
   Generate insights from the articles
   """
-  prompt = f'Extract the key insights & trends from these {len(articles)} articles and highlight any resources worth checking:\n'
-  for url, title, summary, content in zip(urls, titles, summaries, contents):
-    prompt += f'URL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n'
+  MAX_TOKENS = 4092
+  article_prompts = [f'URL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(urls, titles, summaries, contents)]
+  
+  insights = ""
+  current_prompt = f'Extract the key insights & trends from these {len(articles)} articles and highlight any resources worth checking:\n'
+  for article_prompt in article_prompts:
+    if count_tokens(current_prompt + article_prompt) > MAX_TOKENS:
+      response = openai.ChatCompletion.create(
+        model='gpt-3.5-turbo-0613', 
+        temperature=0.2,
+        n=1,
+        messages=[
+          {'role': 'system', 'content': 'You are a research analyst writing in UK English.'}, 
+          {'role': 'user', 'content': current_prompt}
+        ]
+      )
+      insights += response['choices'][0]['message']['content']
+      current_prompt = article_prompt
+    else:
+      current_prompt += article_prompt
 
-  response = openai.ChatCompletion.create(
-    model='gpt-3.5-turbo-0613', 
-    temperature=0.2,
-    n=1,
-    messages=[
-      {'role': 'system', 'content': 'You are a research analyst writing in UK English.'}, 
-      {'role': 'user', 'content': prompt}
-    ]
-  )
-  insights = response['choices'][0]['message']['content']
+  # Process remaining articles
+  if current_prompt:
+    response = openai.ChatCompletion.create(
+      model='gpt-3.5-turbo-0613', 
+      temperature=0.2,
+      n=1,
+      messages=[
+        {'role': 'system', 'content': 'You are a research analyst writing in UK English.'}, 
+        {'role': 'user', 'content': current_prompt}
+      ]
+    )
+    insights += response['choices'][0]['message']['content']
   sendEmail(insights, urls)
 
   print('========================================================================================')
