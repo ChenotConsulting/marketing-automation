@@ -12,6 +12,7 @@ FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
 FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
 FEEDLY_API_URL = os.getenv('FEEDLY_API_URL')
 FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
+FEEDLY_FOLDERS_LIST = FEEDLY_FOLDERS.split(',')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -90,7 +91,7 @@ def sendEmail(body, urls):
 yesterday = datetime.now() - timedelta(days=1)
 timestamp_ms = int(yesterday.timestamp() * 1000)
 
-for folder_id in FEEDLY_FOLDERS:
+for folder_id in FEEDLY_FOLDERS_LIST:
 
   folder_name = 'Sustainability' if folder_id == '9bb0acab-0d68-431e-89ca-d4136dcaad5b' else 'Consultancy' if folder_id == '7fbce7bc-11dc-4bcb-986a-0116094a4c0b' else 'AI'
   # Get articles ids for this folder
