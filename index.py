@@ -67,7 +67,7 @@ def generateInsights(articles, folder_name, urls, titles, summaries, contents):
       ]
     )
     insights += response['choices'][0]['message']['content']
-  sendEmail(insights, urls)
+  sendEmail(len(articles), folder_name, insights, urls)
 
   print('========================================================================================')
   print(f'Insights for folder {folder_name}:')
@@ -100,7 +100,7 @@ def generateLinkedInPost(articles, folder_name, urls, titles, summaries, content
   print(post)
   print('========================================================================================')
 
-def sendEmail(body, urls):
+def sendEmail(articles_count, folder_name, body, urls):
   """
   Set up SMTP server
   """
@@ -110,7 +110,7 @@ def sendEmail(body, urls):
   smtp_server.login(EMAIL_USERNAME, EMAIL_PASSWORD) # https://support.google.com/accounts/answer/185833
 
   # Send email 
-  msg = f'Subject: Feedly Insights\n\n{urls}\n\n{body}'
+  msg = f'Subject: Feedly Insights from {articles_count} articles for folder {folder_name}\n\n{urls}\n\n{body}'
   smtp_server.sendmail(EMAIL_USERNAME, EMAIL_USERNAME, msg)
   smtp_server.quit()
 
