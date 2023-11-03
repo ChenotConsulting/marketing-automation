@@ -53,7 +53,7 @@ def generateInsights(articles, folder_name, urls, titles, summaries, contents):
   current_prompt = f'Extract the key insights & trends from these {len(articles)} articles and highlight any resources worth checking. For each key insight, mention the source article:\n'
   for article_prompt in article_prompts:
     if count_tokens(current_prompt + article_prompt) > MAX_TOKENS:
-      insights = callOpenAI(current_prompt, insights)
+      insights = callOpenAI(current_prompt)
       current_prompt = article_prompt
     else:
       current_prompt += article_prompt
@@ -109,13 +109,12 @@ def sendEmail(articles_count, folder_name, body, urls):
   smtp_server.sendmail(EMAIL_USERNAME, EMAIL_USERNAME, msg)
   smtp_server.quit()
 
-def main():
+def main(args):
   # Get articles from last 24 hours
   yesterday = datetime.now() - timedelta(days=1)
   timestamp_ms = int(yesterday.timestamp() * 1000)
 
   for folder_id in FEEDLY_FOLDERS_LIST:
-
     folder_name = 'Sustainability' if folder_id == '9bb0acab-0d68-431e-89ca-d4136dcaad5b' else 'Consultancy' if folder_id == '7fbce7bc-11dc-4bcb-986a-0116094a4c0b' else 'AI'
     # Get articles ids for this folder
     feedly_url = f'{FEEDLY_API_URL}/v3/streams/ids?streamId=user/{FEEDLY_USER_ID}/category/{folder_id}&newerThan={timestamp_ms}&count=20'
@@ -138,12 +137,23 @@ def main():
       summaries = [a['summary']['content'] if 'summary' in a else '' for a in articles]
       contents = [a['fullContent'] if 'fullContent' in a else '' for a in articles]
       
-      generateInsights(articles, folder_name=folder_name, urls=urls, titles=titles, summaries=summaries, contents=contents)
-      # generateLinkedInPost(articles, folder_name=folder_name, urls=urls, titles=titles, summaries=summaries, contents=contents)
+      if args == 'Generate Insights':
+        generateInsights(articles, folder_name=folder_name, urls=urls, titles=titles, summaries=summaries, contents=contents)
+      if args == 'Create LinkedIn post':
+        generateLinkedInPost(articles, folder_name=folder_name, urls=urls, titles=titles, summaries=summaries, contents=contents)
     else: 
       print('========================================================================================')
       print(f'There are no articles to analyse for folder {folder_name}.')
       print('========================================================================================')   
 
 if __name__ == "__main__":
-    main()
+  options = ['Generate Insights', 'Create LinkedIn post']
+  print("Select an option:")
+  for index, option in enumerate(options):
+      print(f"{index+1}) {option}")
+
+  selection = input("Enter the number of your choice: ")
+  if selection.isdigit() and 1 <= int(selection) <= len(options):
+      selected_option = options[int(selection) - 1]
+  
+  main(selected_option)
