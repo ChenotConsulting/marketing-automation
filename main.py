@@ -18,6 +18,7 @@ FEEDLY_FOLDERS_LIST = FEEDLY_FOLDERS.split(',')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+EMAIL_RECIPIENT = os.getenv('EMAIL_RECIPIENT')
 MODEL = 'gpt-4-1106-preview'
 MAX_TOKENS = 4097
 
@@ -132,7 +133,7 @@ def sendEmail(subject, body, urls):
 
   try:
     msg = f'Subject: {subject}\n\n{urls}\n\n{body}'
-    smtp_server.sendmail(EMAIL_USERNAME, EMAIL_USERNAME, msg.encode('utf-8'))
+    smtp_server.sendmail(EMAIL_USERNAME, EMAIL_RECIPIENT, msg.encode('utf-8'))
     print('Email sent!')
     smtp_server.quit()
   except Exception as e:
