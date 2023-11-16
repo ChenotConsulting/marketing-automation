@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Header
-from typing import Annotated
 import uvicorn
 import os
 from dotenv import load_dotenv
