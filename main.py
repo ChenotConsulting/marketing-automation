@@ -14,6 +14,8 @@ class Main():
   def __init__(self):
     logging.basicConfig(level=logging.DEBUG)
 
+    self.mongo = MongoDB()
+    
     # Load environment variables
     logging.info('Loading environment variables...')
     load_dotenv()
@@ -52,7 +54,6 @@ class Main():
     self.feedly = requests.Session()
     self.feedly.headers = {'authorization': f'OAuth {self.FEEDLY_ACCESS_TOKEN}'}
     openai.api_key = self.OPENAI_API_KEY
-    self.mongo = MongoDB()
 
   def count_tokens(self, text):
       enc = tiktoken.get_encoding("cl100k_base")
