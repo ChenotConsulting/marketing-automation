@@ -15,12 +15,14 @@ class Main():
     logging.basicConfig(level=logging.DEBUG)
 
     # Load environment variables
+    logging.info('Loading environment variables...')
     load_dotenv()
     self.FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
     self.FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
     self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL')
     self.FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
-    self.FEEDLY_FOLDERS_LIST = str(self.FEEDLY_FOLDERS).split(',')
+    if self.FEEDLY_FOLDERS is not None:
+      self.FEEDLY_FOLDERS_LIST = str(self.FEEDLY_FOLDERS).split(',')
     self.OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     self.EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
     self.EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -29,6 +31,7 @@ class Main():
     self.MAX_TOKENS = 4097
 
     # Setup clients
+    logging.info('Setting up the API clients...')
     self.feedly = requests.Session()
     self.feedly.headers = {'authorization': 'OAuth ' + self.FEEDLY_ACCESS_TOKEN}
     openai.api_key = self.OPENAI_API_KEY

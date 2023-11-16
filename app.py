@@ -25,7 +25,7 @@ def generateFeedlyInsights(userId, days: int = 1):
   except Exception as e:
     error = {
       "status": "Error", 
-      "message": e,
+      "message": f"Error generating insights: {e}",
       "traceback": traceback.print_exc()
     }
     logging.error(error)
@@ -47,7 +47,7 @@ def generateFeedlyInsightsLinkedInPost(userId, days: int = 2):
   except Exception as e:
     error = {
       "status": "Error", 
-      "error": e
+      "message": f"Error generating LinkedIn post: {e}"
     }
     return error
 
