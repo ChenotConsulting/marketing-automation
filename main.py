@@ -29,10 +29,17 @@ class Main():
     self.feedly = requests.Session()
     self.feedly.headers = {'authorization': 'OAuth ' + self.FEEDLY_ACCESS_TOKEN}
     openai.api_key = self.OPENAI_API_KEY
+    self.mongo = MongoDB()
 
   def getConfig(self, userId):
-    config = MongoDB.findConfigForUser(userId=userId)
-    return config
+    config = self.mongo.findConfigForUser(userId=userId)
+    self.FEEDLY_USER_ID = config['feedly']['user']
+    self.FEEDLY_ACCESS_TOKEN = config['feedly']['accessToken']
+    self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
+    self.OPENAI_API_KEY = config['openai']['apiKey']
+    self.EMAIL_USERNAME = config['google']['emailUsername']
+    self.EMAIL_PASSWORD = config['google']['emailPassword']
+    self.EMAIL_RECIPIENT = config['google']['emailRecipient']
 
   def count_tokens(self, text):
       enc = tiktoken.get_encoding("cl100k_base")
@@ -105,10 +112,11 @@ class Main():
 
       self.sendEmail(subject=f'Feedly Insights from {self.article_count} articles for folder {folder_id}', body=insights, urls=self.urls)
 
-  def generateLinkedInPost(self, days):
+  def generateLinkedInPost(self, days, userId):
     """
     Generate a LinkedIn post from the articles
     """
+    self.getConfig(userId=userId)
     for folder_id in self.FEEDLY_FOLDERS_LIST:
       articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 

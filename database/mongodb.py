@@ -25,9 +25,9 @@ class MongoDB():
         try:
             db = self.client.get_database(name='InsightsAutomation')
             coll = db.get_collection('config')
-            coll.find_one({"userId": userId})
+            config = coll.find_one({"userId": userId})
             logging.info(f'Found config for user {userId}')
-            return coll
+            return config
         except Exception as e:
             logging.error(f'Error getting config for user {userId}: \n{e}')
             raise Exception(e)

@@ -8,7 +8,7 @@ import logging
 load_dotenv()
 app = FastAPI()
 
-@app.get("/marketing/feedly/insights/user/{userId}", status_code=200)
+@app.get("/marketing/user/{userId}/feedly/insights", status_code=200)
 def generateFeedlyInsights(userId, days: int = 1):
   try: 
     main = Main()
@@ -28,11 +28,11 @@ def generateFeedlyInsights(userId, days: int = 1):
     }
     return error
 
-@app.get("/marketing/feedly/insights/linkedinpost", status_code=200)
-def generateFeedlyInsightsLinkedInPost(days: int = 2):
+@app.get("/marketing/user/{userId}/feedly/insights/linkedinpost", status_code=200)
+def generateFeedlyInsightsLinkedInPost(userId, days: int = 2):
   try: 
     main = Main()
-    post = main.generateLinkedInPost(days)
+    post = main.generateLinkedInPost(userId=userId, days=days)
     results = {
       "status": "OK",
       "results": {
