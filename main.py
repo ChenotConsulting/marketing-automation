@@ -15,7 +15,7 @@ class Main():
     logging.basicConfig(level=logging.DEBUG)
 
     self.mongo = MongoDB()
-    
+
     # Load environment variables
     logging.info('Loading environment variables...')
     load_dotenv()
@@ -30,7 +30,7 @@ class Main():
     self.EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
     self.EMAIL_RECIPIENT = os.getenv('EMAIL_RECIPIENT')
     self.MODEL = 'gpt-4-1106-preview'
-    self.MAX_TOKENS = 4097
+    self.MAX_TOKENS = 128000
 
     if(self.FEEDLY_ACCESS_TOKEN is not None):
       self.setupClients()
