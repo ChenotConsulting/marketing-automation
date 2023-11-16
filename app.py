@@ -3,6 +3,7 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 from main import Main
+import logging
 
 load_dotenv()
 app = FastAPI()
@@ -55,11 +56,16 @@ def checkHealth():
   return result
 
 if __name__ == "__main__":
-    print("Starting webserver...")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8080)),
-        log_level=os.getenv('LOG_LEVEL', "info"),
-        proxy_headers=True
-    )
+    logging.basicConfig(level=logging.DEBUG)
+    logging.info("Starting webserver...")
+
+    try:
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=int(os.getenv("PORT", 8080)),
+            log_level=os.getenv('LOG_LEVEL', "info"),
+            proxy_headers=True
+        )
+    except Exception as e:
+        logging.error(e)
