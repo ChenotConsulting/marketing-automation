@@ -53,6 +53,7 @@ def checkHealth():
   result = {
     "status": "OK"
   }
+  logging.info(result)
   return result
 
 if __name__ == "__main__":
