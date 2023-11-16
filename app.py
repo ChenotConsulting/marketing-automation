@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
+from typing import Annotated
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -26,6 +27,7 @@ def generateFeedlyInsights(userId, days: int = 1):
       "status": "Error", 
       "error": e
     }
+    logging.error(error)
     return error
 
 @app.get("/marketing/user/{userId}/feedly/insights/linkedinpost", status_code=200)
@@ -69,4 +71,8 @@ if __name__ == "__main__":
             proxy_headers=True
         )
     except Exception as e:
-        logging.error(e)
+        error = {
+           "status": "error",
+           "message": f"Error launching application: {e}"
+        }
+        logging.error(error)

@@ -7,10 +7,13 @@ import openai
 import smtplib
 import tiktoken
 import sys
+import logging
 from database.mongodb import MongoDB
 
 class Main():
   def __init__(self):
+    logging.basicConfig(level=logging.DEBUG)
+
     # Load environment variables
     load_dotenv()
     self.FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
@@ -79,7 +82,7 @@ class Main():
       articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 
       if articles:
-        print(f'Generating insights from articles in folder: {folder_id}')
+        logging.info(f'Generating insights from articles in folder: {folder_id}')
         article_prompts = [f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents)]
         
         role = 'You are a research analyst writing in UK English.'
@@ -100,7 +103,7 @@ class Main():
       articles = self.getArticles(folder_id=folder_id, daysdelta=1)
 
       if articles:
-        print(f'Generating insights from articles in folder: {folder_id}')
+        logging.info(f'Generating insights from articles in folder: {folder_id}')
         article_prompts = [f'URL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents)]
         
         role = 'You are a research analyst writing in UK English.'
@@ -121,7 +124,7 @@ class Main():
       articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 
       if articles:
-        print(f'Generating LinkedIn post from articles in folder: {folder_id}')
+        logging.info(f'Generating LinkedIn post from articles in folder: {folder_id}')
         role = 'You are a marketing manager working for a consultancy called ProfessionalPulse.'
         prompt = f'Imagine that you are a marketing manager for a consultancy called ProfessionalPulse.'
         prompt += f'\nContext: At ProfessionalPulse, we\'re passionate about leveraging technology to transform the operations of Business Services teams within Professional Services Firms.'
@@ -153,7 +156,7 @@ class Main():
       articles = self.getArticles(folder_id=folder_id, daysdelta=2)
 
       if articles:
-        print(f'Generating LinkedIn post from articles in folder: {folder_id}')
+        logging.info(f'Generating LinkedIn post from articles in folder: {folder_id}')
         role = 'You are a marketing manager working for a consultancy called ProfessionalPulse.'
         prompt = f'Imagine that you are a marketing manager for a consultancy called ProfessionalPulse.'
         prompt += f'\nContext: At ProfessionalPulse, we\'re passionate about leveraging technology to transform the operations of Business Services teams within Professional Services Firms.'
@@ -187,15 +190,15 @@ class Main():
     smtp_server.login(self.EMAIL_USERNAME, self.EMAIL_PASSWORD) # https://support.google.com/accounts/answer/185833
 
     # Send email 
-    print(f'Sending email...')
+    logging.info(f'Sending email...')
 
     try:
       msg = f'Subject: {subject}\n\n{urls}\n\n{body}'
       smtp_server.sendmail(self.EMAIL_USERNAME, self.EMAIL_RECIPIENT, msg.encode('utf-8'))
-      print('Email sent!')
+      logging.info('Email sent!')
       smtp_server.quit()
     except Exception as e:
-      print(f'Error sending email: \n{e}')
+      logging.error(f'Error sending email: \n{e}')
 
   def refreshFeedlyToken(self):
     refresh_token = os.getenv('FEEDLY_REFRESH_TOKEN')
@@ -218,21 +221,21 @@ class Main():
     timeframe = datetime.now() - timedelta(days=daysdelta)
     timestamp_ms = int(timeframe.timestamp() * 1000)
 
-    print(f'Getting articles for folder: {folder_id}')
+    logging.info(f'Getting articles for folder: {folder_id}')
     # Get articles ids for this folder
     feedly_url = f'{self.FEEDLY_API_URL}/v3/streams/ids?streamId=user/{self.FEEDLY_USER_ID}/category/{folder_id}&newerThan={timestamp_ms}&count=20'
     response = self.feedly.get(feedly_url)
     
     if(response.status_code == 200):
-      # print(f'Feedly response: {json.dumps(json.loads(response.text), indent=4)}')
+      # logging.info(f'Feedly response: {json.dumps(json.loads(response.text), indent=4)}')
       ids = json.loads(response.text)['ids']
-      # print(f'IDs: {ids}')
-      print(f'Retrieved {len(ids)} articles.')
+      # logging.info(f'IDs: {ids}')
+      logging.info(f'Retrieved {len(ids)} articles.')
 
       # Get articles from the ids
       feedly_entries_url = f'{self.FEEDLY_API_URL}/v3/entries/.mget'
       entries_response = self.feedly.post(feedly_entries_url, None, ids)
-      # print(f'Entries response: {json.dumps(json.loads(entries_response.text), indent=4)}')
+      # logging.info(f'Entries response: {json.dumps(json.loads(entries_response.text), indent=4)}')
       articles = json.loads(entries_response.text)
       self.article_count = len(articles)
 
@@ -245,17 +248,17 @@ class Main():
 
         return True
       else: 
-        print('========================================================================================')
-        print(f'There are no articles to analyse for folder {folder_id}.')
-        print('========================================================================================') 
+        logging.info('========================================================================================')
+        logging.info(f'There are no articles to analyse for folder {folder_id}.')
+        logging.info('========================================================================================') 
     else:
-      print(f'Could not get articles with status code: {response.status_code}. Details: \n{response.content}') 
+      logging.warning(f'Could not get articles with status code: {response.status_code}. Details: \n{response.content}') 
 
     return False
 
   def main(self, arg):
     self.args = arg
-    print(f'Starting process for option: {self.args}')
+    logging.info(f'Starting process for option: {self.args}')
 
     if self.args == 'Generate Insights':
       self.emailInsights()
