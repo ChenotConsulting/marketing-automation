@@ -8,6 +8,8 @@ build:
   env: # define environment variables
     - name: PORT
       value: '8080'
+    - name: 'LOG_LEVEL'
+      value: 'info'
 
 run:
   command: python app.py # command to run fastapi
