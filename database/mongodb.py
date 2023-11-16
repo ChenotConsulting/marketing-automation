@@ -19,12 +19,14 @@ class MongoDB():
         except Exception as e:
             print(f'Error pinging MongoDB: {e}')
 
-    def retrieveCollection(self, dbname):
+    def findConfigForUser(self, userId):
         try:
-            db = self.client.get_database(name=dbname)
+            db = self.client.get_database(name='InsightsAutomation')
             coll = db.get_collection('config')
-            
-            print(f'Returned database {dbname}')
-            return db
+            coll.find_one({"userId": userId})
+            print(f'Found config got user {userId}')
+            return coll
         except Exception as e:
-            print(f'Error getting database {dbname}: \n{e}')
+            print(f'Error getting config for user {userId}: \n{e}')
+            raise Exception(e)
+        
