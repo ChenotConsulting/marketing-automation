@@ -20,7 +20,7 @@ class Main():
     self.FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
     self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL')
     self.FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
-    self.FEEDLY_FOLDERS_LIST = self.FEEDLY_FOLDERS.split(',')
+    self.FEEDLY_FOLDERS_LIST = str(self.FEEDLY_FOLDERS).split(',')
     self.OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     self.EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
     self.EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -39,8 +39,7 @@ class Main():
     config = self.mongo.findConfigForUser(userId=userId)
     self.FEEDLY_USER_ID = config['feedly']['user']
     self.FEEDLY_ACCESS_TOKEN = config['feedly']['accessToken']
-    # self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
-    self.FEEDLY_FOLDERS_LIST = config['feedly']['folders']
+    self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
     self.OPENAI_API_KEY = config['openai']['apiKey']
     self.EMAIL_USERNAME = config['google']['emailUsername']
     self.EMAIL_PASSWORD = config['google']['emailPassword']
