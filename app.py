@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from main import Main
 import logging
+import traceback
 
 load_dotenv()
 app = FastAPI()
@@ -24,7 +25,8 @@ def generateFeedlyInsights(userId, days: int = 1):
   except Exception as e:
     error = {
       "status": "Error", 
-      "error": e
+      "message": e,
+      "traceback": traceback.print_exc()
     }
     logging.error(error)
     return error
