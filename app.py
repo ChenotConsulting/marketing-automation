@@ -8,11 +8,11 @@ import logging
 load_dotenv()
 app = FastAPI()
 
-@app.get("/marketing/feedly/insights", status_code=200)
-def generateFeedlyInsights(days: int = 1):
+@app.get("/marketing/feedly/insights/user/{userId}", status_code=200)
+def generateFeedlyInsights(userId, days: int = 1):
   try: 
     main = Main()
-    insights = main.generateInsights(days)
+    insights = main.generateInsights(days=days, userId=userId)
     results = {
       "status": "OK",
       "results": {

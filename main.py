@@ -7,6 +7,7 @@ import openai
 import smtplib
 import tiktoken
 import sys
+from database.mongodb import MongoDB
 
 class Main():
   def __init__(self):
@@ -28,6 +29,10 @@ class Main():
     self.feedly = requests.Session()
     self.feedly.headers = {'authorization': 'OAuth ' + self.FEEDLY_ACCESS_TOKEN}
     openai.api_key = self.OPENAI_API_KEY
+
+  def getConfig(self, userId):
+    config = MongoDB.findConfigForUser(userId=userId)
+    return config
 
   def count_tokens(self, text):
       enc = tiktoken.get_encoding("cl100k_base")
@@ -58,10 +63,11 @@ class Main():
 
     return response.data[0].url
 
-  def generateInsights(self, days):
+  def generateInsights(self, days, userId):
     """
     Generate insights from the articles
     """
+    self.getConfig(userId)
     for folder_id in self.FEEDLY_FOLDERS_LIST:
       articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 

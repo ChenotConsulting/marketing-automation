@@ -1,4 +1,5 @@
 import os
+import logging
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 
@@ -6,6 +7,7 @@ class MongoDB():
     load_dotenv()
 
     def __init__(self):
+        logging.basicConfig(level=logging.DEBUG)
         self.uri = f"mongodb+srv://{os.getenv('MONGODB_USERNAME')}:{os.getenv('MONGODB_PASSWORD')}@{os.getenv('MONGODB_URL')}/?retryWrites=true&w=majority"
 
         # Create a new client and connect to the server
@@ -24,9 +26,9 @@ class MongoDB():
             db = self.client.get_database(name='InsightsAutomation')
             coll = db.get_collection('config')
             coll.find_one({"userId": userId})
-            print(f'Found config got user {userId}')
+            logging.info(f'Found config for user {userId}')
             return coll
         except Exception as e:
-            print(f'Error getting config for user {userId}: \n{e}')
+            logging.error(f'Error getting config for user {userId}: \n{e}')
             raise Exception(e)
         
