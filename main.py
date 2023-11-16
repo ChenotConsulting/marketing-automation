@@ -30,12 +30,8 @@ class Main():
     self.MODEL = 'gpt-4-1106-preview'
     self.MAX_TOKENS = 4097
 
-    # Setup clients
-    logging.info('Setting up the API clients...')
-    self.feedly = requests.Session()
-    self.feedly.headers = {'authorization': 'OAuth ' + self.FEEDLY_ACCESS_TOKEN}
-    openai.api_key = self.OPENAI_API_KEY
-    self.mongo = MongoDB()
+    if(self.FEEDLY_ACCESS_TOKEN is not None):
+      self.setupClients()
 
   def getConfig(self, userId):
     logging.info(f'Get config for user {userId}')
@@ -47,6 +43,16 @@ class Main():
     self.EMAIL_USERNAME = config['google']['emailUsername']
     self.EMAIL_PASSWORD = config['google']['emailPassword']
     self.EMAIL_RECIPIENT = config['google']['emailRecipient']
+
+    self.setupClients()
+
+  def setupClients(self):
+    # Setup clients
+    logging.info('Setting up the API clients...')
+    self.feedly = requests.Session()
+    self.feedly.headers = {'authorization': f'OAuth {self.FEEDLY_ACCESS_TOKEN}'}
+    openai.api_key = self.OPENAI_API_KEY
+    self.mongo = MongoDB()
 
   def count_tokens(self, text):
       enc = tiktoken.get_encoding("cl100k_base")
