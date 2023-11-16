@@ -35,10 +35,12 @@ class Main():
     self.mongo = MongoDB()
 
   def getConfig(self, userId):
+    logging.info(f'Get config for user {userId}')
     config = self.mongo.findConfigForUser(userId=userId)
     self.FEEDLY_USER_ID = config['feedly']['user']
     self.FEEDLY_ACCESS_TOKEN = config['feedly']['accessToken']
-    self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
+    # self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
+    self.FEEDLY_FOLDERS_LIST = config['feedly']['folders']
     self.OPENAI_API_KEY = config['openai']['apiKey']
     self.EMAIL_USERNAME = config['google']['emailUsername']
     self.EMAIL_PASSWORD = config['google']['emailPassword']
@@ -223,7 +225,7 @@ class Main():
 
     logging.info(f'Getting articles for folder: {folder_id}')
     # Get articles ids for this folder
-    feedly_url = f'{self.FEEDLY_API_URL}/v3/streams/ids?streamId=user/{self.FEEDLY_USER_ID}/category/{folder_id}&newerThan={timestamp_ms}&count=20'
+    feedly_url = f'{self.FEEDLY_API_URL}/v3/streams/ids?streamId={folder_id}&newerThan={timestamp_ms}&count=20'
     response = self.feedly.get(feedly_url)
     
     if(response.status_code == 200):
