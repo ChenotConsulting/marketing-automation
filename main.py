@@ -159,7 +159,7 @@ class Main():
         post += f'\n\nImage URL: {image}'
         return [post, self.urls]
 
-  def sendLinkedInPost(self):
+  def emailLinkedInPost(self):
     """
     Generate a LinkedIn post from the articles
     """
@@ -274,7 +274,7 @@ class Main():
     if self.args == 'Generate Insights':
       self.emailInsights()
     if self.args == 'Create LinkedIn post':
-      self.generateLinkedInPost()
+      self.emailLinkedInPost()
     
 if __name__ == "__main__":
   main = Main()
