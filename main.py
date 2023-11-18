@@ -21,7 +21,7 @@ class Main():
     load_dotenv()
     self.FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
     self.FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
-    self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL')
+    self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL', 'https://cloud.feedly.com')
     self.FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
     if self.FEEDLY_FOLDERS is not None:
       self.FEEDLY_FOLDERS_LIST = str(self.FEEDLY_FOLDERS).split(',')
