@@ -14,11 +14,12 @@ def generateFeedlyInsights(userId, days: int = 1):
   try: 
     main = Main()
     insights = main.generateInsights(days=days, userId=userId)
+    logging.info(f'Insights retrieved: {insights}')
     results = {
-      "status": "OK",
+      "status": "OK" if insights is not None else "Not Found",
       "results": {
-        "insights": insights[0],
-        "urls": insights[1]
+        "insights": insights[0] if insights is not None else "No insights.",
+        "urls": insights[1] if insights is not None else "No URLs."
       }
     }
     return results
@@ -77,3 +78,5 @@ if __name__ == "__main__":
            "message": f"Error launching application: {e}"
         }
         logging.error(error)
+
+    # generateFeedlyInsights(userId='1699685958170x317202834451805900', days=3)
