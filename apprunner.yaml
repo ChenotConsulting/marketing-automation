@@ -3,14 +3,15 @@ runtime: python3 # runtime to use
 build:
   commands:
     pre-build:
+      - pip install --upgrade pip
       - python3 --version
-      - yum update
-      - yum install python3
+      # - yum install python3
     build:
       - pip install -r requirements.txt # install dependencies
     post-build:
       - python3 --version
 run:
+  runtime-version: 3.9.16
   command: python app.py # command to run fastapi
   network:
     port: 8080 # port AppRunner will expose
