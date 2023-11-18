@@ -9,10 +9,9 @@ class MongoDB():
     def __init__(self):
         logging.basicConfig(level=logging.DEBUG)
         self.uri = f"mongodb+srv://{os.getenv('MONGODB_USERNAME')}:{os.getenv('MONGODB_PASSWORD')}@{os.getenv('MONGODB_URL', 'insightsautomation.to3so7y.mongodb.net')}/?retryWrites=true&w=majority"
-        logging.info(f'MongoDB URL: {self.uri}')
 
         # Create a new client and connect to the server
-        self.client = MongoClient(self.uri)
+        self.client = MongoClient(self.uri, tls=True)
 
     def testConnection(self):
         # Send a ping to confirm a successful connection

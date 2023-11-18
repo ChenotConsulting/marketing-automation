@@ -3,12 +3,12 @@ runtime: python3 # runtime to use
 build:
   commands:
     pre-build:
-      - openssl version
+      # - openssl version
       # - yum install openssl=1.1.1
     build:
       - pip install -r requirements.txt # install dependencies
     post-build:
-      - openssl version
+      # - openssl version
   env: # define environment variables
     - name: OPENSSL_VERSION
       value: 1.1.1
