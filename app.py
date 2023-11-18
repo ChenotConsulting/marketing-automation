@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Header
-from typing import Annotated
+from typing import Union
+from typing_extensions import Annotated
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ def authoriseRequest(x_api_key):
       return False
 
 @app.get("/marketing/user/{userId}/feedly/insights", status_code=200)
-def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[str | None, Header()] = None):
+def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[Union[str, None], Header()] = None):
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
@@ -48,7 +49,7 @@ def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[str | Non
     return error
 
 @app.get("/marketing/user/{userId}/feedly/insights/linkedinpost", status_code=200)
-def generateFeedlyInsightsLinkedInPost(userId, days: int = 2, x_api_key: Annotated[str | None, Header()] = None):
+def generateFeedlyInsightsLinkedInPost(userId, days: int = 2, x_api_key: Annotated[Union[str, None], Header()] = None):
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
