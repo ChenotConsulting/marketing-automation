@@ -1,5 +1,8 @@
 # marketing-automation
-This application retrieves the articles in a defined folder created in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
+This application can be run locally as a script or can be deployed as an API. To run it locally simply type the command ```python3 main.py``` in the terminal and select an option from the prompt.
+When running it as an API, use the command ```python3 app.py```.
+
+It retrieves the articles in a defined folder created in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
 It also allows the creation of a LinkedIn post with GPT-4 and an accompanying image generated with DALL-E 3. Both are sent as an email to the specified recipient. 
 
 To run this application, you need to add a .env file with the following key/value pairs.
@@ -21,5 +24,16 @@ EMAIL_PASSWORD=[YOUR GOOGLE APP PASSWORD] \
 EMAIL_RECIPIENT=[THE RECIPIENT'S EMAIL ADDRESS] \
 
 #LINKEDIN \
+LINKEDIN_USERNAME=[YOUR LINKEDIN USERNAME] \
+LINKEDIN_PASSWORD=[YOUR LINKEDIN PASSWORD] \
 LINKEDIN_ACCESS_TOKEN=[YOUR LINKEDIN ACCESS TOKEN] \
+
+#ONLY REQUIRED TO RUN THE APPLICATION AS AN API
+#MONGODB \
+MONGODB_URL=[YOUR MONGODB DB DOMAIN] \
+MONGODB_USERNAME=[YOUR MONGODB DB USERNAME] \
+MONGODB_PASSWORD=[YOUR MONGODB DB PASSWORD] \
+
+#AUTHORIZATION \
+AUTH_API_KEY=[YOUR APPLICATION API KEY. MUST BE GENERATED] \
 

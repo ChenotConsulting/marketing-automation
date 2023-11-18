@@ -1,17 +1,9 @@
 version: 1.0 # version of the specification
-runtime: python3 # runtime to use
+runtime: python3.11 # runtime to use
 build:
   commands:
-    pre-build:
-      # - openssl version
-      # - yum install openssl=1.1.1
     build:
       - pip install -r requirements.txt # install dependencies
-    post-build:
-      # - openssl version
-  env: # define environment variables
-    - name: OPENSSL_VERSION
-      value: 1.1.1
 run:
   command: python app.py # command to run fastapi
   network:
