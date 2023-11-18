@@ -24,7 +24,6 @@ def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[Union[str
     if authoriseRequest(x_api_key):
       main = Main()
       insights = main.generateInsights(days=days, userId=userId)
-      logging.info(f'Insights retrieved: {insights}')
       results = {
         "status": "OK" if insights is not None else "Not Found",
         "results": {
