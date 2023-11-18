@@ -29,3 +29,5 @@ run:
       value: 'insights-automation-app'
     - name: MONGODB_PASSWORD
       value: 'hfxzrn8bpkhgz6YAM'
+    - name: AUTH_API_KEY
+      value: 'd3c89f4b-693b-4dce-ad4e-cfd47ae3cfab'

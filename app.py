@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Header
+from typing import Annotated
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -9,20 +10,34 @@ import traceback
 load_dotenv()
 app = FastAPI()
 
+def authoriseRequest(x_api_key):
+   auth_api_key = os.getenv('AUTH_API_KEY')
+   if auth_api_key == x_api_key:
+      return True
+   else:
+      return False
+
 @app.get("/marketing/user/{userId}/feedly/insights", status_code=200)
-def generateFeedlyInsights(userId, days: int = 1):
+def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[str | None, Header()] = None):
   try: 
-    main = Main()
-    insights = main.generateInsights(days=days, userId=userId)
-    logging.info(f'Insights retrieved: {insights}')
-    results = {
-      "status": "OK" if insights is not None else "Not Found",
-      "results": {
-        "insights": insights[0] if insights is not None else "No insights.",
-        "urls": insights[1] if insights is not None else "No URLs."
+    if authoriseRequest(x_api_key):
+      main = Main()
+      insights = main.generateInsights(days=days, userId=userId)
+      logging.info(f'Insights retrieved: {insights}')
+      results = {
+        "status": "OK" if insights is not None else "Not Found",
+        "results": {
+          "insights": insights[0] if insights is not None else "No insights.",
+          "urls": insights[1] if insights is not None else "No URLs."
+        }
       }
-    }
-    return results
+      return results
+    else:
+      results = {
+        "status": "Not Authorized",
+        "message": "You are not authorized to access this service."
+      }
+      return results
   except Exception as e:
     error = {
       "status": "Error", 
@@ -33,18 +48,24 @@ def generateFeedlyInsights(userId, days: int = 1):
     return error
 
 @app.get("/marketing/user/{userId}/feedly/insights/linkedinpost", status_code=200)
-def generateFeedlyInsightsLinkedInPost(userId, days: int = 2):
+def generateFeedlyInsightsLinkedInPost(userId, days: int = 2, x_api_key: Annotated[str | None, Header()] = None):
   try: 
-    main = Main()
-    post = main.generateLinkedInPost(userId=userId, days=days)
-    results = {
-      "status": "OK",
-      "results": {
-        "post": post[0],
-        "urls": post[1]
+    if authoriseRequest(x_api_key):
+      main = Main()
+      post = main.generateLinkedInPost(userId=userId, days=days)
+      results = {
+        "status": "OK",
+        "results": {
+          "post": post[0],
+          "urls": post[1]
+        }
       }
-    }
-    return results
+      return results
+    else:
+      results = {
+        "status": "Not Authorized",
+        "message": "You are not authorized to access this service."
+      }
   except Exception as e:
     error = {
       "status": "Error", 
