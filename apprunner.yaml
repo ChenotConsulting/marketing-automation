@@ -4,7 +4,7 @@ build:
   commands:
     pre-build:
       - openssl version
-      - yum install openssl-1.1.1
+      - yum install openssl=1.1.1
     build:
       - pip install -r requirements.txt # install dependencies
   env: # define environment variables
