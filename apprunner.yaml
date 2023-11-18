@@ -2,8 +2,14 @@ version: 1.0 # version of the specification
 runtime: python3.11 # runtime to use
 build:
   commands:
+    pre-build:
+      - python3 --version
+      - yum update
+      - yum install python3
     build:
       - pip install -r requirements.txt # install dependencies
+    post-build:
+      - python3 --version
 run:
   command: python app.py # command to run fastapi
   network:
