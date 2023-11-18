@@ -235,6 +235,7 @@ class Main():
     logging.info(f'Getting articles for folder: {folder_id}')
     # Get articles ids for this folder
     feedly_url = f'{self.FEEDLY_API_URL}/v3/streams/ids?streamId={folder_id}&newerThan={timestamp_ms}&count=20'
+    logging.info(f'Getting articles with Feedly URL: {feedly_url}')
     response = self.feedly.get(feedly_url)
     
     if(response.status_code == 200):
