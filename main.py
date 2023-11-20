@@ -14,14 +14,16 @@ class Main():
   def __init__(self):
     logging.basicConfig(level=logging.DEBUG)
 
-    self.mongo = MongoDB()
+    self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL', 'https://cloud.feedly.com')
+    self.MODEL = 'gpt-4-1106-preview'
+    self.MAX_TOKENS = 128000
 
+  def getLocalConfig(self):
     # Load environment variables
     logging.info('Loading environment variables...')
     load_dotenv()
     self.FEEDLY_USER_ID = os.getenv('FEEDLY_USER_ID')
     self.FEEDLY_ACCESS_TOKEN = os.getenv('FEEDLY_ACCESS_TOKEN')
-    self.FEEDLY_API_URL = os.getenv('FEEDLY_API_URL', 'https://cloud.feedly.com')
     self.FEEDLY_FOLDERS = os.getenv('FEEDLY_FOLDERS')
     if self.FEEDLY_FOLDERS is not None:
       self.FEEDLY_FOLDERS_LIST = str(self.FEEDLY_FOLDERS).split(',')
@@ -29,24 +31,27 @@ class Main():
     self.EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')
     self.EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
     self.EMAIL_RECIPIENT = os.getenv('EMAIL_RECIPIENT')
-    self.MODEL = 'gpt-4-1106-preview'
-    self.MAX_TOKENS = 128000
 
     if(self.FEEDLY_ACCESS_TOKEN is not None):
       self.setupClients()
 
   def getConfig(self, userId):
     logging.info(f'Get config for user {userId}')
+    self.mongo = MongoDB()
     config = self.mongo.findConfigForUser(userId=userId)
-    self.FEEDLY_USER_ID = config['feedly']['user']
-    self.FEEDLY_ACCESS_TOKEN = config['feedly']['accessToken']
-    self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
-    self.OPENAI_API_KEY = config['openai']['apiKey']
-    self.EMAIL_USERNAME = config['google']['emailUsername']
-    self.EMAIL_PASSWORD = config['google']['emailPassword']
-    self.EMAIL_RECIPIENT = config['google']['emailRecipient']
+    if config is not None:
+      self.FEEDLY_USER_ID = config['feedly']['user']
+      self.FEEDLY_ACCESS_TOKEN = config['feedly']['accessToken']
+      self.FEEDLY_FOLDERS_LIST = str(config['feedly']['folders']).split(', ')
+      self.OPENAI_API_KEY = config['openai']['apiKey']
+      self.EMAIL_USERNAME = config['google']['emailUsername']
+      self.EMAIL_PASSWORD = config['google']['emailPassword']
+      self.EMAIL_RECIPIENT = config['google']['emailRecipient']
 
-    self.setupClients()
+      self.setupClients()
+      return True
+    else:
+      return False
 
   def setupClients(self):
     # Setup clients
@@ -88,23 +93,25 @@ class Main():
     """
     Generate insights from the articles
     """
-    self.getConfig(userId)
-    for folder_id in self.FEEDLY_FOLDERS_LIST:
-      articles = self.getArticles(folder_id=folder_id, daysdelta=days)
+    if self.getConfig(userId):
+      for folder_id in self.FEEDLY_FOLDERS_LIST:
+        articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 
-      if articles:
-        logging.info(f'Generating insights from articles in folder: {folder_id}')
-        article_prompts = [f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents)]
-        
-        role = 'You are a research analyst writing in UK English.'
-        prompt = f'Extract the key insights & trends from these {self.article_count} articles and highlight any resources worth checking. For each key insight, mention the source article:\n'
-        for article_prompt in article_prompts:
-          prompt += article_prompt
-        insights = self.callOpenAIChat(role, prompt)
+        if articles:
+          logging.info(f'Generating insights from articles in folder: {folder_id}')
+          article_prompts = [f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents)]
+          
+          role = 'You are a research analyst writing in UK English.'
+          prompt = f'Extract the key insights & trends from these {self.article_count} articles and highlight any resources worth checking. For each key insight, mention the source article:\n'
+          for article_prompt in article_prompts:
+            prompt += article_prompt
+          insights = self.callOpenAIChat(role, prompt)
 
-        return [insights, self.urls]
-      else:
-        return None
+          return [insights, self.urls]
+        else:
+          return "no-articles-found"
+    else: 
+      return "no-config-found"
 
   def emailInsights(self):
     """
@@ -130,34 +137,38 @@ class Main():
     """
     Generate a LinkedIn post from the articles
     """
-    self.getConfig(userId=userId)
-    for folder_id in self.FEEDLY_FOLDERS_LIST:
-      articles = self.getArticles(folder_id=folder_id, daysdelta=days)
+    if self.getConfig(userId=userId):
+      for folder_id in self.FEEDLY_FOLDERS_LIST:
+        articles = self.getArticles(folder_id=folder_id, daysdelta=days)
 
-      if articles:
-        logging.info(f'Generating LinkedIn post from articles in folder: {folder_id}')
-        role = 'You are a marketing manager working for a consultancy called ProfessionalPulse.'
-        prompt = f'Imagine that you are a marketing manager for a consultancy called ProfessionalPulse.'
-        prompt += f'\nContext: At ProfessionalPulse, we\'re passionate about leveraging technology to transform the operations of Business Services teams within Professional Services Firms.'
-        prompt += f'Our journey began in the dynamic realm of IT and consultancy, and was inspired by real-life challenges faced by these teams.'
-        prompt += f'Today, we use our expertise and unique approach to help these teams navigate their challenges, boost efficiency, and strike a balance between their professional and personal lives.'
-        prompt += f'Discover more about our ethos, our journey, and how we can help you.'
-        prompt += f'\nYou are tasked with extracting insights and generate a LinkedIn post including the links to the relevant articles from these {self.article_count} articles:'
-        for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents):
-          prompt += f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n'
-        prompt += f'\nDo not use the context in the post. It\'s for your information only.'
-        prompt += f'\nYou should only talk about the insights extracted from these articles with a bias towards process automation, and the links to the articles should be neatly listed at the very end of the post, after everything else.'
-        prompt += f'\nUse numbers for each insight to point to the relevant article URL.'
-        prompt += f'\nWord the insights as if I was commeting on the article rather than just writing an extract. Each insight must be a short paragraph rather than a single sentence.'
-        prompt += f'\nThe post must be written in UK English, focused on the key insights around AI and technology, and sound professional as the target audience are professionals.'
-        prompt += f'\nMention that the links are in the first comment and add the links at the bottom, listed by the number of the insight they belong to.'
-        prompt += f'\nFinish with a call to action asking readers to message me on LinkedIn if they are interested in discussing either the insights or how I could help them.'
-        prompt += f'\nAll posts must include this at the bottom: Image source: DALL-E 3'
+        if articles:
+          logging.info(f'Generating LinkedIn post from articles in folder: {folder_id}')
+          role = 'You are a marketing manager working for a consultancy called ProfessionalPulse.'
+          prompt = f'Imagine that you are a marketing manager for a consultancy called ProfessionalPulse.'
+          prompt += f'\nContext: At ProfessionalPulse, we\'re passionate about leveraging technology to transform the operations of Business Services teams within Professional Services Firms.'
+          prompt += f'Our journey began in the dynamic realm of IT and consultancy, and was inspired by real-life challenges faced by these teams.'
+          prompt += f'Today, we use our expertise and unique approach to help these teams navigate their challenges, boost efficiency, and strike a balance between their professional and personal lives.'
+          prompt += f'Discover more about our ethos, our journey, and how we can help you.'
+          prompt += f'\nYou are tasked with extracting insights and generate a LinkedIn post including the links to the relevant articles from these {self.article_count} articles:'
+          for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents):
+            prompt += f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n'
+          prompt += f'\nDo not use the context in the post. It\'s for your information only.'
+          prompt += f'\nYou should only talk about the insights extracted from these articles with a bias towards process automation, and the links to the articles should be neatly listed at the very end of the post, after everything else.'
+          prompt += f'\nUse numbers for each insight to point to the relevant article URL.'
+          prompt += f'\nWord the insights as if I was commeting on the article rather than just writing an extract. Each insight must be a short paragraph rather than a single sentence.'
+          prompt += f'\nThe post must be written in UK English, focused on the key insights around AI and technology, and sound professional as the target audience are professionals.'
+          prompt += f'\nMention that the links are in the first comment and add the links at the bottom, listed by the number of the insight they belong to.'
+          prompt += f'\nFinish with a call to action asking readers to message me on LinkedIn if they are interested in discussing either the insights or how I could help them.'
+          prompt += f'\nAll posts must include this at the bottom: Image source: DALL-E 3'
 
-        post = self.callOpenAIChat(role, prompt)
-        image = self.callOpenAIImage(f'Generate an image based on the following LinkedIn post: \n{post}')
-        post += f'\n\nImage URL: {image}'
-        return [post, self.urls]
+          post = self.callOpenAIChat(role, prompt)
+          image = self.callOpenAIImage(f'Generate an image based on the following LinkedIn post: \n{post}')
+          post += f'\n\nImage URL: {image}'
+          return [post, self.urls]
+        else:
+          return "no-articles-found"
+    else: 
+      return "no-config-found"
 
   def emailLinkedInPost(self):
     """
@@ -271,6 +282,7 @@ class Main():
   def main(self, arg):
     self.args = arg
     logging.info(f'Starting process for option: {self.args}')
+    self.getLocalConfig()
 
     if self.args == 'Generate Insights':
       self.emailInsights()

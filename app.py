@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Response, Header, status
 from typing import Union
 from typing_extensions import Annotated
 import uvicorn
@@ -7,6 +7,12 @@ from dotenv import load_dotenv
 from main import Main
 import logging
 import traceback
+from pydantic import BaseModel
+
+
+class Insights(BaseModel):
+   userId: str
+   days: int = 1
 
 load_dotenv()
 app = FastAPI()
@@ -18,25 +24,40 @@ def authoriseRequest(x_api_key):
    else:
       return False
 
-@app.get("/marketing/user/{userId}/feedly/insights", status_code=200)
-def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[Union[str, None], Header()] = None):
+@app.post("/marketing/feedly/insights", status_code=status.HTTP_200_OK)
+def generateFeedlyInsights(insights: Insights, response: Response, x_api_key: Annotated[Union[str, None], Header()] = None):
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
-      insights = main.generateInsights(days=days, userId=userId)
-      results = {
-        "status": "OK" if insights is not None else "Not Found",
-        "results": {
-          "insights": insights[0] if insights is not None else "No insights.",
-          "urls": insights[1] if insights is not None else "No URLs."
+      insights = main.generateInsights(userId=insights.userId, days=insights.days)
+      results = None
+
+      if insights == "no-articles-found":
+        results = {
+          "status": "No articles found"
         }
-      }
+        response.status_code = status.HTTP_404_NOT_FOUND
+      if insights == "no-config-found":
+        results = {
+          "status": "User config not found"
+        }
+        response.status_code = status.HTTP_404_NOT_FOUND
+      else:
+        results = {
+          "status": "OK",
+          "results": {
+            "insights": insights[0] if insights is not None else "No insights.",
+            "urls": insights[1] if insights is not None else "No URLs."
+          }
+        }          
+
       return results
     else:
       results = {
         "status": "Not Authorized",
         "message": "You are not authorized to access this service."
       }
+      response.status_code = status.HTTP_401_UNAUTHORIZED
       return results
   except Exception as e:
     error = {
@@ -45,35 +66,53 @@ def generateFeedlyInsights(userId, days: int = 1, x_api_key: Annotated[Union[str
       "traceback": traceback.print_exc()
     }
     logging.error(error)
+    response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     return error
 
-@app.get("/marketing/user/{userId}/feedly/insights/linkedinpost", status_code=200)
-def generateFeedlyInsightsLinkedInPost(userId, days: int = 2, x_api_key: Annotated[Union[str, None], Header()] = None):
+@app.post("/marketing/feedly/insights/linkedinpost", status_code=status.HTTP_200_OK)
+def generateFeedlyInsightsLinkedInPost(insights: Insights, response: Response, x_api_key: Annotated[Union[str, None], Header()] = None):
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
-      post = main.generateLinkedInPost(userId=userId, days=days)
-      results = {
-        "status": "OK",
-        "results": {
-          "post": post[0],
-          "urls": post[1]
+      post = main.generateLinkedInPost(userId=insights.userId, days=insights.days)
+
+      if post == "no-articles-found":
+        results = {
+          "status": "No articles found"
         }
-      }
+        response.status_code = status.HTTP_404_NOT_FOUND
+      if post == "no-config-found":
+        results = {
+          "status": "User config not found"
+        }
+        response.status_code = status.HTTP_404_NOT_FOUND
+      else:
+        results = {
+          "status": "OK",
+          "results": {
+            "post": post[0],
+            "urls": post[1]
+          }
+        }
+
       return results
     else:
       results = {
         "status": "Not Authorized",
         "message": "You are not authorized to access this service."
       }
+      response.status_code = status.HTTP_401_UNAUTHORIZED
+      return results
   except Exception as e:
     error = {
       "status": "Error", 
       "message": f"Error generating LinkedIn post: {e}"
     }
+    logging.error(error)
+    response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     return error
 
-@app.get("/marketing/health", status_code=200)
+@app.get("/marketing/health", status_code=status.HTTP_200_OK)
 def checkHealth():
   result = {
     "status": "OK"
