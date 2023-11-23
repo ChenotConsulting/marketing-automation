@@ -11,10 +11,15 @@ from pydantic import BaseModel
 
 
 class Insights(BaseModel):
-   userId: str
-   days: int = 1
-   insights: str = ''
-   urls: list = []
+  userId: str
+  days: int = 1
+  insights: str = ''
+  urls: list = []
+
+class Post(BaseModel):
+  userId: str
+  days: int = 2
+  insightIds: list = []
 
 load_dotenv()
 app = FastAPI()
@@ -44,6 +49,11 @@ def generateFeedlyInsights(insights: Insights, response: Response, x_api_key: An
           "status": "User config not found"
         }
         response.status_code = status.HTTP_404_NOT_FOUND
+      if insights == "insights-failed":
+        results = {
+          "status": "Could not insert insights in the database"
+        }
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
       else:
         results = {
           "status": "OK",
@@ -72,11 +82,11 @@ def generateFeedlyInsights(insights: Insights, response: Response, x_api_key: An
     return error
 
 @app.post("/marketing/feedly/insights/linkedinpost", status_code=status.HTTP_200_OK)
-def generateFeedlyInsightsLinkedInPost(insights: Insights, response: Response, x_api_key: Annotated[Union[str, None], Header()] = None):
+def generateFeedlyInsightsLinkedInPost(post: Post, response: Response, x_api_key: Annotated[Union[str, None], Header()] = None):
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
-      post = main.generateLinkedInPost(userId=insights.userId, days=insights.days, insights=insights.insights, urls=insights.urls)
+      post = main.generateLinkedInPost(userId=post.userId, days=post.days, insightIds=post.insightIds)
 
       if post == "no-articles-found":
         results = {
@@ -88,6 +98,11 @@ def generateFeedlyInsightsLinkedInPost(insights: Insights, response: Response, x
           "status": "User config not found"
         }
         response.status_code = status.HTTP_404_NOT_FOUND
+      if post == "post-failed":
+        results = {
+          "status": "The post could not be saved to the database"
+        }
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
       else:
         results = {
           "status": "OK",
