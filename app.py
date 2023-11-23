@@ -93,7 +93,8 @@ def generateFeedlyInsightsLinkedInPost(insights: Insights, response: Response, x
           "status": "OK",
           "results": {
             "post": post[0],
-            "urls": post[1]
+            "urls": post[1],
+            "image": post[2]
           }
         }
 
