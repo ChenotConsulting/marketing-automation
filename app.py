@@ -13,6 +13,8 @@ from pydantic import BaseModel
 class Insights(BaseModel):
    userId: str
    days: int = 1
+   insights: str = ''
+   urls: list = []
 
 load_dotenv()
 app = FastAPI()
@@ -74,7 +76,7 @@ def generateFeedlyInsightsLinkedInPost(insights: Insights, response: Response, x
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
-      post = main.generateLinkedInPost(userId=insights.userId, days=insights.days)
+      post = main.generateLinkedInPost(userId=insights.userId, days=insights.days, insights=insights.insights, urls=insights.urls)
 
       if post == "no-articles-found":
         results = {
