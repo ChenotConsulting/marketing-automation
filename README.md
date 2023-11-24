@@ -1,11 +1,10 @@
-# marketing-automation
-This application can be run locally as a script or can be deployed as an API. To run it locally simply type the command ```python3 main.py``` in the terminal and select an option from the prompt.
-When running it as an API, use the command ```python3 app.py```.
+# Overview
+This application can be run locally as a script or can be deployed as an API. The required dependencies can be found in the `requirements.txt` file at the root of the repository and can be installed by running `pip install -r requirements.txt`.
 
-The application retrieves the articles in a defined folder created in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
-It also allows the creation of a LinkedIn post with GPT-4 and an accompanying image generated with DALL-E 3. Both are sent as an email to the specified recipient. 
+The application retrieves the articles from a user-created folder in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
+It also allows the creation of a LinkedIn post with GPT-4 and an accompanying image generated with DALL-E 3. When running as a local application, both the insights and the LinkedIn post are sent as an email to the specified recipient. When running as an API, the ingishts and the post are saved to your MongoDB Atlas database and returned via the API endpoints.
 
-To run this application locally, you need to add a .env file with the following key/value pairs. To run it as an API in a Cloud-based platform, you will need to add the environment variables where relevant. You will also need a MongoDB Atlas database, which you can create for free: [Getting Started with MongoDB Atlas](https://www.mongodb.com/docs/atlas/getting-started/). 
+# Environment Variables
 
 #FEEDLY \
 FEEDLY_USER_ID=[YOUR FEEDLY USER ID] \
@@ -37,3 +36,9 @@ MONGODB_PASSWORD=[YOUR MONGODB DB PASSWORD] \
 #AUTHORIZATION \
 AUTH_API_KEY=[YOUR APPLICATION API KEY. MUST BE GENERATED] # This is used to secure access to the API \
 
+# Local application
+To run this application locally, you need to add a .env file with the key/value pairs above. You then run the command `python3 main.py`
+
+# API
+To run it as an API in a Cloud-based platform, you will need to add the environment variables where relevant. You will also need a MongoDB Atlas database, which you can create for free: [Getting Started with MongoDB Atlas](https://www.mongodb.com/docs/atlas/getting-started/).
+You then need to run the command `python3 app.py`. This will start a `Uvicorn server` running on port 8080. \
