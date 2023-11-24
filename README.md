@@ -2,10 +2,10 @@
 This application can be run locally as a script or can be deployed as an API. To run it locally simply type the command ```python3 main.py``` in the terminal and select an option from the prompt.
 When running it as an API, use the command ```python3 app.py```.
 
-It retrieves the articles in a defined folder created in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
+The application retrieves the articles in a defined folder created in Feedly and for each article extracts the key insights and trends. An email is sent to the specified recipient with the insights.
 It also allows the creation of a LinkedIn post with GPT-4 and an accompanying image generated with DALL-E 3. Both are sent as an email to the specified recipient. 
 
-To run this application, you need to add a .env file with the following key/value pairs.
+To run this application locally, you need to add a .env file with the following key/value pairs. To run it as an API in a Cloud-based platform, you will need to add the environment variables where relevant. You will also need a MongoDB Atlas database, which you can create for free: [Getting Started with MongoDB Atlas](https://www.mongodb.com/docs/atlas/getting-started/). 
 
 #FEEDLY \
 FEEDLY_USER_ID=[YOUR FEEDLY USER ID] \
@@ -35,5 +35,5 @@ MONGODB_USERNAME=[YOUR MONGODB DB USERNAME] \
 MONGODB_PASSWORD=[YOUR MONGODB DB PASSWORD] \
 
 #AUTHORIZATION \
-AUTH_API_KEY=[YOUR APPLICATION API KEY. MUST BE GENERATED] \
+AUTH_API_KEY=[YOUR APPLICATION API KEY. MUST BE GENERATED] # This is used to secure access to the API \
 

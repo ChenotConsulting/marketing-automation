@@ -19,7 +19,7 @@ class Insights(BaseModel):
 class Post(BaseModel):
   userId: str
   days: int = 2
-  insightIds: list = []
+  insightIds: list = [] # TODO: Replace array with text and split items by comma
 
 load_dotenv()
 app = FastAPI()
