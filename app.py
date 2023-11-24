@@ -13,8 +13,6 @@ from pydantic import BaseModel
 class Insights(BaseModel):
   userId: str
   days: int = 1
-  insights: str = ''
-  urls: list = []
 
 class Post(BaseModel):
   userId: str
