@@ -9,7 +9,6 @@ import logging
 import traceback
 from pydantic import BaseModel
 
-
 class Insights(BaseModel):
   userId: str
   days: int = 1
@@ -18,6 +17,9 @@ class Post(BaseModel):
   userId: str
   days: int = 2
   insightIds: list = [] # TODO: Replace array with text and split items by comma
+  role: str = 'You are a marketing manager working for a consultancy called ProfessionalPulse.'
+  post_prompt: str = ''
+  image_prompt: str = f'Generate an image based on the following LinkedIn post:'
 
 load_dotenv()
 app = FastAPI()
@@ -84,7 +86,7 @@ def generateFeedlyInsightsLinkedInPost(post: Post, response: Response, x_api_key
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
-      post = main.generateLinkedInPost(userId=post.userId, days=post.days, insightIds=post.insightIds)
+      post = main.generateLinkedInPost(userId=post.userId, days=post.days, insightIds=post.insightIds, prompt_role=post.role, post_prompt=post.post_prompt, image_prompt=post.image_prompt)
 
       if post == "no-articles-found":
         results = {
