@@ -101,8 +101,8 @@ class Main():
           logging.info(f'Generating insights from articles in folder: {folder_id}')
           article_prompts = [f'\nURL: {url}\nTitle: {title}\nSummary: {summary}\nContent: {content}\n' for url, title, summary, content in zip(self.urls, self.titles, self.summaries, self.contents)]
           
-          role = 'You are a research analyst writing in UK English.'
-          prompt = f'Extract the key insights & trends from these {self.article_count} articles and highlight any resources worth checking. For each key insight, mention the source article:\n'
+          role = 'You are a research analyst.'
+          prompt = f'Extract the key insights & trends in UK English from these {self.article_count} articles and highlight any resources worth checking. For each key insight, mention the source article:\n'
           for article_prompt in article_prompts:
             prompt += article_prompt
           insights = self.callOpenAIChat(role, prompt)
