@@ -163,10 +163,8 @@ class Main():
             if post_prompt != '':
               prompt = f'{post_prompt} \n{insights} \n{urls}'
             else:
-              prompt = f'\nContext: At ProfessionalPulse, we\'re passionate about leveraging technology to transform the operations of Business Services teams within Professional Services Firms.'
-              prompt += f'Our journey began in the dynamic realm of IT and consultancy, and was inspired by real-life challenges faced by these teams.'
-              prompt += f'Today, we use our expertise and unique approach to help these teams navigate their challenges, boost efficiency, and strike a balance between their professional and personal lives.'
-              prompt += f'Discover more about our ethos, our journey, and how we can help you.'
+              prompt = f'\nContext: My mission is to demystify AI and make it accessible and practical for professional services firms. Through ProfessionalPulse, I aim to deliver bespoke AI data strategies that are not only technically sound but also align with the '
+              prompt += f'unique business goals and challenges of each client. We strive to turn AI from a concept into a tangible asset, driving innovation, efficiency, and competitive advantage.'
               prompt += f'\nThe post must be written from the voice of the consultancy.'
               prompt += f'\nDo not use the context in the post. It\'s for your information only.'
               prompt += f'\nYou should only talk about the insights extracted from these articles with a bias towards process automation.'
