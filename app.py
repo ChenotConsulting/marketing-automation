@@ -3,7 +3,6 @@ from typing import Union
 from typing_extensions import Annotated
 import uvicorn
 import os
-import json
 from dotenv import load_dotenv
 from main import Main
 import logging
@@ -84,7 +83,7 @@ def generateFeedlyInsights(insights: Insights, response: Response, x_api_key: An
 
 @app.post("/marketing/feedly/insights/linkedinpost", status_code=status.HTTP_200_OK)
 def generateFeedlyInsightsLinkedInPost(post: Post, response: Response, x_api_key: Annotated[Union[str, None], Header()] = None):
-  logging.info(json.dumps(post))
+  logging.info(post)
   try: 
     if authoriseRequest(x_api_key):
       main = Main()
